@@ -1,9 +1,6 @@
 package com.springsecurity.basic.config;
 
-import com.springsecurity.basic.filter.AuthoritiesLoggingAfterFilter;
-import com.springsecurity.basic.filter.AuthoritiesLoggingAtFilter;
-import com.springsecurity.basic.filter.CsrfCookieFilter;
-import com.springsecurity.basic.filter.RequestValidationBeforeFilter;
+import com.springsecurity.basic.filter.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -62,6 +59,8 @@ public class ProjectSecurityConfig {
         http.addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class);
         http.addFilterAt(new AuthoritiesLoggingAtFilter(), BasicAuthenticationFilter.class);
         http.addFilterAfter(new AuthoritiesLoggingAfterFilter(), BasicAuthenticationFilter.class);
+        http.addFilterAfter(new JWTTokenGenerationFilter(), BasicAuthenticationFilter.class);
+        http.addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class);
         http.authorizeHttpRequests((requests) ->
                 requests
 //                        .requestMatchers("/myAccount").hasAuthority(("VIEWACCOUNT"))
@@ -70,7 +69,7 @@ public class ProjectSecurityConfig {
 //                        .requestMatchers("/myCards").hasAuthority("VIEWCAREDS")
                         .requestMatchers("/myAccount").hasRole(("USER"))
                         .requestMatchers("/myBalance").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/myLoans").hasRole("USER")
+                        .requestMatchers("/myLoans").authenticated()
                         .requestMatchers("/myCards").hasRole("USER")
                         .requestMatchers("/user").authenticated()
                         .requestMatchers("/notices", "/contact", "/register").permitAll()
